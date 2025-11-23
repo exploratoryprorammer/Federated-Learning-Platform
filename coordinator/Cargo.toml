@@ -1,0 +1,18 @@
+[package]
+name = "coordinator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+dashmap = "6.1.0"
+lazy_static = "1.5.0"
+prometheus = "0.14.0"
+prost = "0.14.1"
+serde = { version = "1.0.228", features = ["derive"] }
+tokio = { version = "1.48.0", features = ["full"] }
+tonic = "0.14.2"
+warp = "0.4.2"
+
+[build-dependencies]
+tonic-build = "0.14.2"
+

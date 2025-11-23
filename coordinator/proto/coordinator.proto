@@ -1,0 +1,19 @@
+syntax = "proto3";
+package federated;
+
+service Coordinator {
+    rpc RegisterClient(ClientInfo) returns (RegistrationResponse);
+    rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+    rpc GetTrainingTask(ClientId) returns (TrainingTask);
+    rpc ReportResults(TrainingResults) returns (Acknowledgement);
+}
+
+message ClientInfo {
+    string client_id = 1;
+    string ip_address = 2;
+    int32 data_samples = 3;
+    float compute_power = 4;
+}
+
+message RegistrationResponse {
+}
