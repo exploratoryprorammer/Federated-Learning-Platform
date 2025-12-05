@@ -1,0 +1,186 @@
+syntax = "proto3";
+
+package federated;
+
+// Coordination Service - Main gRPC service
+service FederatedCoordinator {
+  // Client registration
+  rpc RegisterClient(ClientRegistration) returns (ClientRegistrationResponse);
+  
+  // Get current global model
+  rpc GetGlobalModel(ModelRequest) returns (ModelResponse);
+  
+  rpc SubmitGradients(GradientUpdate) returns (GradientAck);
+  
+  // Heartbeat for client health
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  
+  // Get training configuration
+  rpc GetTrainingConfig(ConfigRequest) returns (TrainingConfig);
+}
+
+// Aggregation Service - C++ gradient aggregator
+service GradientAggregator {
+  // Submit gradients for aggregation
+  rpc AggregateGradients(stream GradientBatch) returns (AggregatedGradients);
+  
+  // Get aggregation statistics
+  rpc GetAggregationStats(StatsRequest) returns (AggregationStats);
+}
+
+// Client Registration
+message ClientRegistration {
+  string client_id = 1;
+  string client_version = 2;
+  ClientCapabilities capabilities = 3;
+  int64 timestamp = 4;
+}
+
+message ClientCapabilities {
+  int32 num_samples = 1;
+  bool supports_compression = 2;
+  bool supports_differential_privacy = 3;
+  string hardware_info = 4;
+}
+
+message ClientRegistrationResponse {
+  bool success = 1;
+  string session_token = 2;
+  int32 assigned_client_index = 3;
+  string message = 4;
+}
+
+// Model Distribution
+message ModelRequest {
+  string client_id = 1;
+  string session_token = 2;
+  int32 current_round = 3;
+}
+
+message ModelResponse {
+  int32 round_number = 1;
+  bytes model_weights = 2;  // Serialized model parameters
+  int64 model_version = 3;
+  ModelMetadata metadata = 4;
+}
+
+message ModelMetadata {
+  int32 total_parameters = 1;
+  string model_architecture = 2;
+  float learning_rate = 3;
+  int32 batch_size = 4;
+}
+
+// Gradient Updates
+message GradientUpdate {
+  string client_id = 1;
+  string session_token = 2;
+  int32 round_number = 3;
+  bytes gradients = 4;  // Serialized gradient tensors
+  GradientMetadata metadata = 5;
+  int64 timestamp = 6;
+}
+
+message GradientMetadata {
+  int32 num_samples_trained = 1;
+  float local_loss = 2;
+  float local_accuracy = 3;
+  bool is_compressed = 4;
+  float compression_ratio = 5;
+  bool has_differential_privacy = 6;
+  DPParameters dp_params = 7;
+}
+
+message DPParameters {
+  float epsilon = 1;
+  float delta = 2;
+  float noise_multiplier = 3;
+  float max_grad_norm = 4;
+}
+
+message GradientAck {
+  bool accepted = 1;
+  string message = 2;
+  int32 next_round = 3;
+}
+
+// Batch Aggregation
+message GradientBatch {
+  repeated GradientUpdate updates = 1;
+  int32 round_number = 2;
+  int32 expected_clients = 3;
+}
+
+message AggregatedGradients {
+  bytes aggregated_weights = 1;
+  int32 num_clients_aggregated = 2;
+  repeated int32 byzantine_clients = 3;  // Indices of detected malicious clients
+  AggregationMetadata metadata = 4;
+}
+
+message AggregationMetadata {
+  float aggregation_time_ms = 1;
+  float compression_ratio = 2;
+  int32 outliers_detected = 3;
+  float median_gradient_norm = 4;
+  repeated float client_gradient_norms = 5;
+}
+
+// Heartbeat
+message HeartbeatRequest {
+  string client_id = 1;
+  string session_token = 2;
+  ClientStatus status = 3;
+}
+
+message ClientStatus {
+  bool is_training = 1;
+  float cpu_usage = 2;
+  float memory_usage_mb = 3;
+  int32 current_round = 4;
+}
+
+message HeartbeatResponse {
+  bool continue_training = 1;
+  int32 next_round = 2;
+  string message = 3;
+}
+
+// Configuration
+message ConfigRequest {
+  string client_id = 1;
+}
+
+message TrainingConfig {
+  int32 total_rounds = 1;
+  int32 local_epochs = 2;
+  int32 batch_size = 3;
+  float learning_rate = 4;
+  bool enable_compression = 5;
+  bool enable_differential_privacy = 6;
+  DPParameters dp_config = 7;
+  int32 aggregation_threshold = 8;  // Min clients needed per round
+}
+
+// Statistics
+message StatsRequest {
+  int32 round_number = 1;
+}
+
+message AggregationStats {
+  int32 total_rounds_completed = 1;
+  int32 total_gradients_processed = 2;
+  float average_aggregation_time_ms = 3;
+  float average_compression_ratio = 4;
+  int32 total_byzantine_detected = 5;
+  repeated RoundStats round_history = 6;
+}
+
+message RoundStats {
+  int32 round_number = 1;
+  int32 clients_participated = 2;
+  float aggregation_time_ms = 3;
+  int32 outliers_detected = 4;
+  float global_loss = 5;
+  float global_accuracy = 6;
+}

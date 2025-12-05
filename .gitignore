@@ -1,1 +1,37 @@
-.vscode
+# Rust
+coordinator/target/
+coordinator/Cargo.lock
+
+# C++
+aggregator/build/
+aggregator/*.o
+aggregator/*.a
+aggregator/aggregator_server
+
+# Python
+python_client/venv/
+python_client/__pycache__/
+python_client/*.pyc
+python_client/*_pb2.py
+python_client/*_pb2_grpc.py
+python_client/data/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Data
+data/
+checkpoints/
+models/

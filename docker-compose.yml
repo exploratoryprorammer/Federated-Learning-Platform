@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  coordinator:
+    build:
+      context: .
+      dockerfile: coordinator/Dockerfile
+    ports:
+      - "50051:50051"
+      - "9090:9090"
+    environment:
+      - RUST_LOG=info
+    networks:
+      - federated
+
+  aggregator:
+    build:
+      context: .
+      dockerfile: aggregator/Dockerfile
+    ports:
+      - "50052:50052"
+    depends_on:
+      - coordinator
+    networks:
+      - federated
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - federated
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - federated
+
+networks:
+  federated:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:

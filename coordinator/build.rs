@@ -1,6 +1,7 @@
-fs main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     tonic_build::configure()
         .build_server(true)
-        .compile(&["../proto/coordinator.proto"], & ["../proto"])
-        .unwrap();
+        .build_client(false)
+        .compile(&["../proto/coordinator.proto"], &["../proto"])?;
+    Ok(())
 }

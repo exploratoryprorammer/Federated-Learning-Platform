@@ -1,0 +1,35 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  external_labels:
+    cluster: "federated-learning"
+    environment: "development"
+
+scrape_configs:
+  - job_name: "coordinator"
+    static_configs:
+      - targets: ["coordinator:9090"]
+        labels:
+          service: "coordinator"
+          component: "rust-grpc"
+
+  - job_name: "aggregator"
+    static_configs:
+      - targets: ["aggregator:9091"]
+        labels:
+          service: "aggregator"
+          component: "cpp-grpc"
+
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+# Alerting rules
+rule_files:
+  - "alerts.yml"
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
