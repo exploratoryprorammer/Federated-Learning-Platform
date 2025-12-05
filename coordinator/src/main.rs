@@ -6,10 +6,10 @@ use tracing::{info, warn};
 
 mod coordinator;
 mod client_manager;
-mod metrics;
+mod metric;
 
 use coordinator::CoordinatorState;
-use metrics::setup_metrics;
+use metric::setup_metrics;
 
 // Include generated protobuf code
 pub mod federated {
@@ -44,8 +44,8 @@ impl FederatedCoordinator for FederatedCoordinatorService {
         
         match state.register_client(req).await {
             Ok(response) => {
-                metrics::ACTIVE_CLIENTS.inc();
-                metrics::TOTAL_REGISTRATIONS.inc();
+                metric::ACTIVE_CLIENTS.inc();
+                metric::TOTAL_REGISTRATIONS.inc();
                 Ok(Response::new(response))
             }
             Err(e) => {
@@ -68,7 +68,7 @@ impl FederatedCoordinator for FederatedCoordinatorService {
 
         match state.get_global_model(req.current_round).await {
             Ok(model) => {
-                metrics::MODEL_REQUESTS.inc();
+                metric::MODEL_REQUESTS.inc();
                 Ok(Response::new(model))
             }
             Err(e) => Err(Status::internal(format!("Model retrieval failed: {}", e))),
@@ -88,8 +88,8 @@ impl FederatedCoordinator for FederatedCoordinatorService {
 
         match state.submit_gradients(req).await {
             Ok(ack) => {
-                metrics::GRADIENTS_RECEIVED.inc();
-                metrics::record_gradient_submission();
+                metric::GRADIENTS_RECEIVED.inc();
+                metric::record_gradient_submission();
                 Ok(Response::new(ack))
             }
             Err(e) => Err(Status::internal(format!("Gradient submission failed: {}", e))),
@@ -109,7 +109,7 @@ impl FederatedCoordinator for FederatedCoordinatorService {
 
         match state.process_heartbeat(req).await {
             Ok(response) => {
-                metrics::HEARTBEATS_RECEIVED.inc();
+                metric::HEARTBEATS_RECEIVED.inc();
                 Ok(Response::new(response))
             }
             Err(e) => Err(Status::internal(format!("Heartbeat failed: {}", e))),

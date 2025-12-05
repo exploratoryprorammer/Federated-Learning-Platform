@@ -175,7 +175,7 @@ pub fn record_aggregation(
 ) {
     AGGREGATION_TIME.observe(duration_secs);
     COMPRESSION_RATIO.set(compression_ratio);
-    BYZANTINE_CLIENTS_DETECTED.inc_by(byzantine_count);
+    BYZANTINE_CLIENTS_DETECTED.inc_by(byzantine_count as f64);
     
     info!(
         "Aggregation metrics: duration={:.3}s, compression={:.2}%, byzantine={}",

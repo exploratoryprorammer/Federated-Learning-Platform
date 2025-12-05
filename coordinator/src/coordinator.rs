@@ -1,8 +1,8 @@
 // rust-server/src/coordinator.rs
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use std::collections::HashMap;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::SystemTime;
 use uuid::Uuid;
 use tracing::{info, warn, debug};
 
@@ -293,11 +293,11 @@ impl CoordinatorState {
             );
             
             // Update metrics
-            crate::metrics::update_round_metrics(self.current_round, avg_accuracy as f64);
-            crate::metrics::record_aggregation(
+            crate::metric::update_round_metrics(self.current_round, avg_accuracy as f64);
+            crate::metric::record_aggregation(
                 elapsed as f64 / 1000.0,
                 0.75, // compression ratio
-                byzantine_detected,
+                byzantine_detected as u64,
             );
         }
         
@@ -355,7 +355,7 @@ impl CoordinatorState {
         self.client_manager.cleanup_inactive(timeout_secs);
         
         // Update metrics
-        crate::metrics::ACTIVE_CLIENTS.set(self.get_active_client_count() as f64);
+        crate::metric::ACTIVE_CLIENTS.set(self.get_active_client_count() as f64);
     }
     
     /// Reset coordinator state for new training run
