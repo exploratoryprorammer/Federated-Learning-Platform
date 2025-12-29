@@ -343,24 +343,9 @@ cd aggregator/build
 - Decrease `epsilon` (less DP noise, but less privacy)
 - Increase `aggregation_threshold` (more clients per round)
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file
-
 ## References
 
 - [Federated Learning: Strategies for Improving Communication Efficiency](https://arxiv.org/abs/1610.05492)
 - [Deep Learning with Differential Privacy](https://arxiv.org/abs/1607.00133)
 - [Byzantine-Robust Distributed Learning](https://arxiv.org/abs/1703.02757)
 
-## Contact
-
-For questions or issues, please open a GitHub issue.
